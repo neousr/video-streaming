@@ -1,11 +1,12 @@
 <?php
 
 echo "### Iniciando captura.\n";
+$time = microtime(true);
 
-$audio_filename = 'Episodio6_audio';
-$video_filename = 'Episodio6_video';
-$video_resolution = '480p';
-$episode_url_fragment = '3341/20171123/';
+$audio_filename = 'Episodio8_audio';
+$video_filename = 'Episodio8_video';
+$video_resolution = '1080p';
+$episode_url_fragment = '3343/20171123/';
 
 $scheme = 'https://';
 $host = 'arsat.cont.ar';
@@ -20,8 +21,8 @@ $response = file_get_contents($url . $master_m3u8);
 // Get audio and video segments
 $m3u8_segments = get_m3u8_segments($response);
 
-// Get m3u8 audio segment, It is at index[0][0]
-$audio_segment_m3u8 = $m3u8_segments[0][0];
+// Get m3u8 audio segment, It is at index[0]
+$audio_segment_m3u8 = $m3u8_segments[0];
 
 $response = file_get_contents($url . $audio_segment_m3u8);
 
@@ -43,17 +44,19 @@ $video_segments = get_video_segments($response);
 // Create video file
 get_and_create_media_file($video_filename, $video_segments, $url, $total_segments);
 
-echo "### Termino el programa.\n";
+$time = microtime(true) - $time;
+echo "Tiempo total de ejecución: " . round($time, 3) . " segundos.\n";
 
 // Util functions
 function get_video_resolution_segment($m3u8_segments, $resolution = '240p') {
     $resolutions = ['240p', '360p', '480p', '720p', '1080p'];
     if (!in_array($resolution, $resolutions)) {
-        return $m3u8_segments[5][0]; // default resolution 240p
+        return $m3u8_segments[5]; // default resolution 240p
     }
-    foreach ($m3u8_segments as $m3u8_segment) {
-        if (str_contains( $m3u8_segment[0], $resolution )) {
-            return $m3u8_segment[0];
+    $n = count($m3u8_segments);
+    for($i = 1; $i < $n; $i++) {
+        if (str_contains( $m3u8_segments[$i], $resolution )) {
+            return $m3u8_segments[$i];
         }
     }
 }
@@ -64,7 +67,11 @@ function get_m3u8_segments($response) {
         $response,
         $m3u8_segments, PREG_SET_ORDER
     );
-    return $m3u8_segments;
+    $temp = [];
+    foreach ($m3u8_segments as $m3u8_segment) {
+        $temp[] = $m3u8_segment[0];
+    }
+    return $temp;
 }
 // Get only .ts audio segments
 function get_audio_segments($response) {
