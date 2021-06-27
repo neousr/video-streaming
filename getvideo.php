@@ -3,10 +3,10 @@
 echo "### Iniciando captura.\n";
 $time = microtime(true);
 
-$audio_filename = 'Episodio8_audio';
-$video_filename = 'Episodio8_video';
-$video_resolution = '1080p';
-$episode_url_fragment = '3343/20171123/';
+$audio_filename = 'Episodio10_audio';
+$video_filename = 'Episodio10_video';
+$video_resolution = '720p';
+$episode_url_fragment = '3345/20171123/';
 
 $scheme = 'https://';
 $host = 'arsat.cont.ar';
@@ -65,13 +65,13 @@ function get_m3u8_segments($response) {
     preg_match_all(
         '/audio_.*m3u8|video_.*m3u8/',
         $response,
-        $m3u8_segments, PREG_SET_ORDER
+        $matches, PREG_SET_ORDER
     );
-    $temp = [];
-    foreach ($m3u8_segments as $m3u8_segment) {
-        $temp[] = $m3u8_segment[0];
+    $m3u8_segments = [];
+    foreach ($matches as $value) {
+        $m3u8_segments[] = $value[0];
     }
-    return $temp;
+    return $m3u8_segments;
 }
 // Get only .ts audio segments
 function get_audio_segments($response) {
